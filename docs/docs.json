@@ -1,0 +1,29 @@
+[
+  {
+    "name": "AppWindowSwitcher",
+    "version": "1.0",
+    "author": "Christopher Maahs <cmaahs@gmail.com>",
+    "license": "MIT",
+    "homepage": "https://www.hammerspoon.org",
+    "description": "Displays a chooser listing all visible windows of the currently focused application. When a window is selected, it receives focus.",
+    "modFuncs": [
+      {
+        "name": "showWindowChooser",
+        "type": "function",
+        "doc": "Show a chooser with all visible windows of the currently focused app. Selecting one focuses that window."
+      },
+      {
+        "name": "bindHotkey",
+        "type": "function",
+        "doc": "Binds the Spoon’s configured hotkey to trigger the window chooser. Configure `hotkey` before calling this."
+      }
+    ],
+    "modVars": [
+      {
+        "name": "hotkey",
+        "type": "table",
+        "doc": "Table defining the hotkey to bind for the chooser. Format: `{ mods = {\"command\", \"ctrl\", \"alt\"}, key = \"w\" }`"
+      }
+    ]
+  }
+]
