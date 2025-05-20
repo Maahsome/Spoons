@@ -20,7 +20,7 @@ local obj = {}
 ---
 --- With this Spoon you will be able to target a specific application (Google Chrome, iTerm2, Sublime Text) and assign a hyper key to cascade the open windows.
 --- Official homepage for more info and documentation:
---- [https://github.com/cmaahs/app-window-switcher-spoon](https://github.com/cmaahs/app-window-switcher-spoon)
+--- [https://github.com/Maahsome/Spoons](https://github.com/Maahsome/Spoons)
 ---
 
 obj.__index = obj
@@ -93,3 +93,4 @@ function obj:bindHotkey()
 end
 
 return obj
+
