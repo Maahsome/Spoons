@@ -3,7 +3,7 @@
   "version": "1.0",
   "author": "Christopher Maahs <cmaahs@gmail.com>",
   "license": "MIT",
-  "homepage": "https://www.hammerspoon.org",
+  "homepage": "https://github.com/Maahsome/Spoons",
   "description": "Displays a chooser listing all visible windows of the currently focused application. When a window is selected, it receives focus.",
   "modFuncs": [
     {
