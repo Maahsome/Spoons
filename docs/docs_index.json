@@ -1,6 +1,6 @@
 [
   {
-    "desc": "With this Spoon you will be able to target a specific application (Google Chrome, iTerm2, Sublime Text) and assign a hyper key to cascade the open windows.",
+    "desc": "With this Spoon you will be prompted with a list of all open windows of the currently focused application.",
     "name": "AppWindowSwitcher",
     "type": "Module"
   }
