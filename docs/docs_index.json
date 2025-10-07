@@ -1,5 +1,10 @@
 [
   {
+    "desc": "This spoon is a grid based launcher/switcher for applications.  It uses your Dock applications and running applications as the source.  Apps are chosen using a grid based chording system.",
+    "name": "AppLauncherSwitcher",
+    "type": "Module"
+  },
+  {
     "desc": "With this Spoon you will be prompted with a list of all open windows of the currently focused application.",
     "name": "AppWindowSwitcher",
     "type": "Module"
