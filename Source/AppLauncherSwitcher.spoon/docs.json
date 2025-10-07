@@ -1,0 +1,19 @@
+[
+  {
+    "Command": [],
+    "Constant": [],
+    "Constructor": [],
+    "Deprecated": [],
+    "Field": [],
+    "Function": [],
+    "Method": [],
+    "Variable": [],
+    "desc": "This spoon is a grid based launcher/switcher for applications.  It uses your Dock applications and running applications as the source.  Apps are chosen using a grid based chording system.",
+    "doc": "The selected application, by chording, will either be launched or brought to the front.\nOfficial homepage for more info and documentation:\n[https://github.com/Maahsome/Spoons](https://github.com/Maahsome/Spoons)\n",
+    "items": [],
+    "name": "AppLauncherSwitcher",
+    "stripped_doc": "Official homepage for more info and documentation:\n[https://github.com/Maahsome/Spoons](https://github.com/Maahsome/Spoons)\n",
+    "submodules": [],
+    "type": "Module"
+  }
+]
