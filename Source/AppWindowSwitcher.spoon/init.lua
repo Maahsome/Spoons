@@ -1,6 +1,9 @@
 -- Copyright (c) 2025 Christopher Maahs
 -- MIT License
 
+--- === AppWindowSwitcher ===
+---
+--- Grid-based window swticher for the currently focused application.
 local obj = {}
 obj.__index = obj
 
