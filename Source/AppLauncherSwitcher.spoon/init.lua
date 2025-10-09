@@ -1,41 +1,36 @@
 -- Copyright (c) 2025 Christopher Maahs
--- Permission is hereby granted, free of charge, to any person obtaining a copy of this
--- software and associated documentation files (the "Software"), to deal in the Software
--- without restriction, including without limitation the rights to use, copy, modify, merge,
--- publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
--- to whom the Software is furnished to do so, subject to the following conditions:
---
--- The above copyright notice and this permission notice shall be included in all copies
--- or substantial portions of the Software.
---
--- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
--- INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
--- PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
--- FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
--- OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
--- DEALINGS IN THE SOFTWARE.
+-- MIT License
 
---- === AppLauncherSwitcher===
+--- === AppLauncherSwitcher ===
 ---
---- This spoon is a grid based launcher/switcher for applications.  It uses your Dock applications and running applications as the source.  Apps are chosen using a grid based chording system.
---- Official homepage for more info and documentation:
---- [https://github.com/Maahsome/Spoons](https://github.com/Maahsome/Spoons)
+--- Grid-based app launcher/switcher combining Dock and running applications.
 ---
 local obj = {}
 obj.__index = obj
 
 obj.name = "AppLauncherSwitcher"
-obj.version = "1.0"
+obj.version = "1.1"
 obj.author = "Christopher Maahs <cmaahs@gmail.com>"
 obj.license = "MIT"
 
-local dockPlist = os.getenv("HOME") .. "/Library/Preferences/com.apple.dock.plist"
+------------------------------------------------------------
+-- Configurable properties
+------------------------------------------------------------
+obj.preferredScreenName = nil -- set via :setPreferredScreen(name)
+obj.fadeDuration = 0.15       -- seconds for fade animation
+obj.dimAlpha = 0.35           -- opacity for non-selected columns
+
+------------------------------------------------------------
+-- Logger
+------------------------------------------------------------
 local logger = hs.logger.new(obj.name)
 obj._logger = logger
 
 ------------------------------------------------------------
--- Helpers
+-- Internal helpers
 ------------------------------------------------------------
+local dockPlist = os.getenv("HOME") .. "/Library/Preferences/com.apple.dock.plist"
+
 local function decodeURL(str)
     return (str:gsub("%%(%x%x)", function(hex)
         return string.char(tonumber(hex, 16))
@@ -96,21 +91,17 @@ local function launchOrActivate(app)
 end
 
 ------------------------------------------------------------
--- Real-time running app cache via hs.window.filter
+-- Running apps via window filter
 ------------------------------------------------------------
 local visibleWindowFilter = hs.window.filter.new()
     :setDefaultFilter{}
-    :setOverrideFilter({
-        visible = true,
-    })
+    :setOverrideFilter({ visible = true })
 
 local runningAppsCache = {}
-local seenBundleIDs = {}
 
 local function refreshRunningApps()
     local windows = visibleWindowFilter:getWindows()
     local apps, seen = {}, {}
-
     for _, win in ipairs(windows) do
         local app = win:application()
         if app then
@@ -140,10 +131,8 @@ local function refreshRunningApps()
         end
     end
     runningAppsCache = apps
-    seenBundleIDs = seen
 end
 
--- initialize and subscribe for updates
 refreshRunningApps()
 visibleWindowFilter:subscribe({
     hs.window.filter.windowCreated,
@@ -152,9 +141,15 @@ visibleWindowFilter:subscribe({
     hs.window.filter.windowHidden,
     hs.window.filter.windowMinimized,
     hs.window.filter.windowUnminimized,
-}, function()
-    hs.timer.doAfter(0.5, refreshRunningApps)
-end)
+}, function() hs.timer.doAfter(0.5, refreshRunningApps) end)
+
+------------------------------------------------------------
+-- Public API
+------------------------------------------------------------
+function obj:setPreferredScreen(name)
+    self.preferredScreenName = name
+    self._logger.i(string.format("Preferred screen set to: %s", name))
+end
 
 ------------------------------------------------------------
 -- Grid UI
@@ -164,12 +159,27 @@ local keyRows = {"A","B","C","D","E","F","G","H","I","J"}
 local keyCols = keyRows
 
 function obj:showGrid()
+    --------------------------------------------------------
+    -- Determine target screen
+    --------------------------------------------------------
     local screen = hs.screen.mainScreen()
+    if self.preferredScreenName then
+        for _, s in ipairs(hs.screen.allScreens()) do
+            if s:name() == self.preferredScreenName then
+                screen = s
+                break
+            end
+        end
+    end
+    if not screen then screen = hs.screen.mainScreen() end
+
     local frame  = screen:frame()
-    local cw, ch = frame.w * 0.8, frame.h * 0.8
+    local cw, ch = frame.w * 0.66, frame.h * 0.8
     local x0, y0 = frame.x + (frame.w - cw) / 2, frame.y + (frame.h - ch) / 2
 
-    -- Combine Dock + cached running apps (no duplicates)
+    --------------------------------------------------------
+    -- Gather apps
+    --------------------------------------------------------
     local dockApps = getDockApps()
     local runningApps = runningAppsCache or {}
     local seen, apps = {}, {}
@@ -186,18 +196,16 @@ function obj:showGrid()
     end
 
     local total = math.min(#apps, gridRows * gridCols)
-    local headerH = 40
-    local cellW, cellH = cw / gridCols, (ch - headerH) / gridRows
+    local cellW, cellH = cw / gridCols, ch / gridRows
 
     --------------------------------------------------------
-    -- Create canvas
+    -- Canvas setup
     --------------------------------------------------------
     local canvas = hs.canvas.new{ x = x0, y = y0, w = cw, h = ch }
     canvas:level(hs.canvas.windowLevels.mainMenu + 1)
     canvas:alpha(0.95)
     canvas:show()
 
-    -- background
     canvas[#canvas + 1] = {
         type = "rectangle",
         action = "fill",
@@ -206,30 +214,14 @@ function obj:showGrid()
     }
 
     --------------------------------------------------------
-    -- Top header row (A–J)
-    --------------------------------------------------------
-    for c = 1, gridCols do
-        local letter = keyCols[c]
-        canvas[#canvas + 1] = {
-            type = "text",
-            text = letter,
-            textSize = 20,
-            textColor = {white = 0.8},
-            frame = {x = (c - 1) * cellW, y = 5, w = cellW, h = headerH - 10},
-            textAlignment = "center",
-        }
-    end
-
-    --------------------------------------------------------
-    -- Draw app grid
+    -- Draw grid
     --------------------------------------------------------
     for i = 1, total do
         local app = apps[i]
-        local r = math.floor((i - 1) / gridCols)
-        local c = (i - 1) % gridCols
-        local x, y = c * cellW, headerH + r * cellH
+        local r = math.floor((i - 1) / gridCols) + 1
+        local c = ((i - 1) % gridCols) + 1
+        local x, y = (c - 1) * cellW, (r - 1) * cellH
 
-        -- subtle tint for running apps
         if hs.application.get(app.bundleID) then
             canvas[#canvas + 1] = {
                 type = "rectangle",
@@ -239,27 +231,75 @@ function obj:showGrid()
             }
         end
 
-        -- icon
         canvas[#canvas + 1] = {
             type = "image",
             image = app.image,
-            frame = {x = x + cellW * 0.375, y = y + 10, w = cellW * 0.25, h = cellW * 0.25},
+            frame = {x = x + cellW * 0.35, y = y + 10, w = cellW * 0.3, h = cellW * 0.3},
             imageScaling = "scaleToFit",
         }
 
-        -- app name
         canvas[#canvas + 1] = {
             type = "text",
             text = app.text,
             textSize = 13,
             textColor = {white = 1},
-            frame = {x = x + 2, y = y + cellH - 28, w = cellW - 4, h = 22},
+            frame = {x = x + 2, y = y + cellH - 30, w = cellW - 4, h = 24},
             textAlignment = "center",
+        }
+
+        local colLetter = keyCols[c]
+        local rowLetter = keyRows[r]
+
+        canvas[#canvas + 1] = {
+            id = string.format("colLetter_%d_%d", r, c),
+            type = "text",
+            text = colLetter,
+            textSize = 20,
+            textColor = {red = 1, green = 1, blue = 0},
+            frame = {x = x + 10, y = y + 8, w = 20, h = 20},
+            textAlignment = "left",
+        }
+        canvas[#canvas + 1] = {
+            id = string.format("rowLetter_%d_%d", r, c),
+            type = "text",
+            text = rowLetter,
+            textSize = 20,
+            textColor = {red = 1, green = 1, blue = 0},
+            frame = {x = x + cellW - 25, y = y + 8, w = 20, h = 20},
+            textAlignment = "right",
         }
     end
 
     --------------------------------------------------------
-    -- Column-first selection logic
+    -- Fade animation helper
+    --------------------------------------------------------
+    local function animateFade(targetCol, duration, endAlpha)
+        local steps = 15
+        local interval = duration / steps
+        local currentStep = 0
+        local overlayId = string.format("fadeOverlay_%d", targetCol)
+
+        local overlay = {
+            id = overlayId,
+            type = "rectangle",
+            action = "fill",
+            fillColor = {white = 0, alpha = 0},
+            frame = {x = (targetCol - 1) * cellW, y = 0, w = cellW, h = ch},
+        }
+        canvas[#canvas + 1] = overlay
+
+        local timer
+        timer = hs.timer.doEvery(interval, function()
+            currentStep = currentStep + 1
+            local alpha = (endAlpha / steps) * currentStep
+            if alpha > endAlpha then alpha = endAlpha end
+            canvas[overlayId].fillColor = {white = 0, alpha = alpha}
+            if currentStep >= steps then timer:stop() end
+        end)
+    end
+
+    --------------------------------------------------------
+    -- Selection logic
     --------------------------------------------------------
     local selectedCol
     local watcher
@@ -269,35 +309,41 @@ function obj:showGrid()
         canvas:delete()
     end
 
-    local function highlightColumn(colIdx)
-        canvas[#canvas + 1] = {
-            id = "colHighlight",
-            type = "rectangle",
-            action = "fill",
-            fillColor = {red = 0.2, green = 0.4, blue = 1, alpha = 0.15},
-            frame = {x = (colIdx - 1) * cellW, y = 0, w = cellW, h = ch},
-        }
-        for row = 1, gridRows do
-            local idx = (row - 1) * gridCols + colIdx
-            if idx <= total then
-                local label = keyRows[row]
-                local y = headerH + (row - 1) * cellH + cellH - 18
-                canvas[#canvas + 1] = {
-                    type = "text",
-                    text = label,
-                    textSize = 20,
-                    textColor = {red = 0.7, green = 0.8, blue = 1},
-                    frame = {x = (colIdx - 1) * cellW + 25, y = y - 65, w = cellW, h = 20},
-                    textAlignment = "left",
-                }
+    local function fadeUnselectedColumns(colIdx)
+        for c = 1, gridCols do
+            if c ~= colIdx then
+                -- remove indicators for unselected columns
+                local removeIds = {}
+                for i, e in ipairs(canvas) do
+                    if e.id and (e.id:match(string.format("colLetter_%%d_%d", c))
+                        or e.id:match(string.format("rowLetter_%%d_%d", c))) then
+                        table.insert(removeIds, i)
+                    end
+                end
+                for i = #removeIds, 1, -1 do
+                    canvas:removeElement(removeIds[i])
+                end
+                -- fade this column
+                animateFade(c, obj.fadeDuration, obj.dimAlpha)
             end
         end
     end
 
+    local function highlightColumn(colIdx)
+        obj._logger.i("Column selected -> " .. keyCols[colIdx])
+
+        -- turn only the selected column's letters blue
+        for i, e in ipairs(canvas) do
+            if e.id and e.id:match(string.format("colLetter_%%d_%d", colIdx)) then
+                canvas[i].textColor = {red = 0, green = 0.5, blue = 1}
+            end
+        end
+
+        fadeUnselectedColumns(colIdx)
+    end
+
     watcher = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(evt)
         local char = evt:getCharacters():upper()
-
-        -- Q to close
         if char == "Q" then
             closeCanvas()
             return true
@@ -309,10 +355,14 @@ function obj:showGrid()
             return true
         elseif selectedCol and hs.fnutils.contains(keyRows, char) then
             local rowIdx = hs.fnutils.indexOf(keyRows, char)
+            obj._logger.i("Row selected -> " .. char)
             local idx = (rowIdx - 1) * gridCols + selectedCol
-            closeCanvas()
             local app = apps[idx]
-            if app then launchOrActivate(app) end
+            if app then
+                obj._logger.i("Launching app -> " .. app.text)
+                launchOrActivate(app)
+            end
+            closeCanvas()
             return true
         end
         return false
