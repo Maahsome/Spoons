@@ -5,7 +5,7 @@
     "type": "Module"
   },
   {
-    "desc": "With this Spoon you will be prompted with a list of all open windows of the currently focused application.",
+    "desc": "Grid-based window swticher for the currently focused application.",
     "name": "AppWindowSwitcher",
     "type": "Module"
   }

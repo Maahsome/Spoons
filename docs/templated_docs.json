@@ -27,13 +27,13 @@
     "Function": [],
     "Method": [],
     "Variable": [],
-    "desc": "With this Spoon you will be prompted with a list of all open windows of the currently focused application.",
-    "desc_gfm": "<p>With this Spoon you will be prompted with a list of all open windows of the currently focused application.</p>\n",
-    "doc": "With this Spoon you will be prompted with a list of all open windows of the currently focused application.\nOfficial homepage for more info and documentation:\n[https://github.com/Maahsome/Spoons](https://github.com/Maahsome/Spoons)\n",
-    "doc_gfm": "<p>With this Spoon you will be prompted with a list of all open windows of the currently focused application.\nOfficial homepage for more info and documentation:\n<a href=\"https://github.com/Maahsome/Spoons\">https://github.com/Maahsome/Spoons</a></p>\n",
+    "desc": "Grid-based window swticher for the currently focused application.",
+    "desc_gfm": "<p>Grid-based window swticher for the currently focused application.</p>\n",
+    "doc": "Grid-based window swticher for the currently focused application.",
+    "doc_gfm": "<p>Grid-based window swticher for the currently focused application.</p>\n",
     "items": [],
     "name": "AppWindowSwitcher",
-    "stripped_doc": "Official homepage for more info and documentation:\n[https://github.com/Maahsome/Spoons](https://github.com/Maahsome/Spoons)\n",
+    "stripped_doc": "",
     "submodules": [],
     "type": "Module"
   }
