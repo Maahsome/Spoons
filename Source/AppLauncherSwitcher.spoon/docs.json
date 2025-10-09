@@ -8,11 +8,11 @@
     "Function": [],
     "Method": [],
     "Variable": [],
-    "desc": "This spoon is a grid based launcher/switcher for applications.  It uses your Dock applications and running applications as the source.  Apps are chosen using a grid based chording system.",
-    "doc": "This spoon is a grid based launcher/switcher for applications.  It uses your Dock applications and running applications as the source.  Apps are chosen using a grid based chording system.\nOfficial homepage for more info and documentation:\n[https://github.com/Maahsome/Spoons](https://github.com/Maahsome/Spoons)\n",
+    "desc": "Grid-based app launcher/switcher combining Dock and running applications.",
+    "doc": "Grid-based app launcher/switcher combining Dock and running applications.\n",
     "items": [],
     "name": "AppLauncherSwitcher",
-    "stripped_doc": "Official homepage for more info and documentation:\n[https://github.com/Maahsome/Spoons](https://github.com/Maahsome/Spoons)\n",
+    "stripped_doc": "",
     "submodules": [],
     "type": "Module"
   }
