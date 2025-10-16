@@ -11,7 +11,7 @@
     "desc": "Canvas-based paste library with paging and delete mode:",
     "doc": "Canvas-based paste library with paging and delete mode:\n - 3x5 grid (columns A..C, rows A..E)\n - Column key (A..C) then Row key (A..E) to select a cell\n - A,A = Add new item dialog (disabled in delete mode)\n - Column letters turn blue when column selected; other columns fade\n - Paging for unlimited items (14 per page, A,A reserved)\n - J / → next page, K / ← previous page (wrap-around)\n - Footer panel below grid shows \"Page X / Y\" (or delete mode text)\n - Delete Mode (X to toggle): red overlay + red footer; selecting deletes\n - Soft pulse flash on deleted cell\n - Snappy fade-in/out (0.10s), page crossfade (0.08s)\n\nStorage: ${HOME}/.config/pastelibrary/items.json",
     "items": [],
-    "name": "PasteLibrary (v2.3.4)",
+    "name": "PasteLibrary",
     "stripped_doc": " - 3x5 grid (columns A..C, rows A..E)\n - Column key (A..C) then Row key (A..E) to select a cell\n - A,A = Add new item dialog (disabled in delete mode)\n - Column letters turn blue when column selected; other columns fade\n - Paging for unlimited items (14 per page, A,A reserved)\n - J / → next page, K / ← previous page (wrap-around)\n - Footer panel below grid shows \"Page X / Y\" (or delete mode text)\n - Delete Mode (X to toggle): red overlay + red footer; selecting deletes\n - Soft pulse flash on deleted cell\n - Snappy fade-in/out (0.10s), page crossfade (0.08s)\n\nStorage: ${HOME}/.config/pastelibrary/items.json",
     "submodules": [],
     "type": "Module"
