@@ -36,24 +36,5 @@
     "stripped_doc": "",
     "submodules": [],
     "type": "Module"
-  },
-  {
-    "Command": [],
-    "Constant": [],
-    "Constructor": [],
-    "Deprecated": [],
-    "Field": [],
-    "Function": [],
-    "Method": [],
-    "Variable": [],
-    "desc": "Canvas-based paste library with paging and delete mode:",
-    "desc_gfm": "<p>Canvas-based paste library with paging and delete mode:</p>\n",
-    "doc": "Canvas-based paste library with paging and delete mode:\n - 3x5 grid (columns A..C, rows A..E)\n - Column key (A..C) then Row key (A..E) to select a cell\n - A,A = Add new item dialog (disabled in delete mode)\n - Column letters turn blue when column selected; other columns fade\n - Paging for unlimited items (14 per page, A,A reserved)\n - J / → next page, K / ← previous page (wrap-around)\n - Footer panel below grid shows \"Page X / Y\" (or delete mode text)\n - Delete Mode (X to toggle): red overlay + red footer; selecting deletes\n - Soft pulse flash on deleted cell\n - Snappy fade-in/out (0.10s), page crossfade (0.08s)\n\nStorage: ${HOME}/.config/pastelibrary/items.json",
-    "doc_gfm": "<p>Canvas-based paste library with paging and delete mode:</p>\n<ul>\n<li>3x5 grid (columns A..C, rows A..E)</li>\n<li>Column key (A..C) then Row key (A..E) to select a cell</li>\n<li>A,A = Add new item dialog (disabled in delete mode)</li>\n<li>Column letters turn blue when column selected; other columns fade</li>\n<li>Paging for unlimited items (14 per page, A,A reserved)</li>\n<li>J / → next page, K / ← previous page (wrap-around)</li>\n<li>Footer panel below grid shows &quot;Page X / Y&quot; (or delete mode text)</li>\n<li>Delete Mode (X to toggle): red overlay + red footer; selecting deletes</li>\n<li>Soft pulse flash on deleted cell</li>\n<li>Snappy fade-in/out (0.10s), page crossfade (0.08s)</li>\n</ul>\n<p>Storage: ${HOME}/.config/pastelibrary/items.json</p>\n",
-    "items": [],
-    "name": "PasteLibrary (v2.3.4)",
-    "stripped_doc": " - 3x5 grid (columns A..C, rows A..E)\n - Column key (A..C) then Row key (A..E) to select a cell\n - A,A = Add new item dialog (disabled in delete mode)\n - Column letters turn blue when column selected; other columns fade\n - Paging for unlimited items (14 per page, A,A reserved)\n - J / → next page, K / ← previous page (wrap-around)\n - Footer panel below grid shows \"Page X / Y\" (or delete mode text)\n - Delete Mode (X to toggle): red overlay + red footer; selecting deletes\n - Soft pulse flash on deleted cell\n - Snappy fade-in/out (0.10s), page crossfade (0.08s)\n\nStorage: ${HOME}/.config/pastelibrary/items.json",
-    "submodules": [],
-    "type": "Module"
   }
 ]

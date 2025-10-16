@@ -1,7 +1,7 @@
 -- Copyright (c) 2025 Christopher Maahs
 -- MIT License
 
---- === PasteLibrary (v2.3.4) ===
+--- === PasteLibrary ===
 ---
 --- Canvas-based paste library with paging and delete mode:
 ---  - 3x5 grid (columns A..C, rows A..E)
@@ -913,3 +913,4 @@ function obj:showAddDialog()
 end
 
 return obj
+

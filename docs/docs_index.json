@@ -8,10 +8,5 @@
     "desc": "Grid-based window swticher for the currently focused application.",
     "name": "AppWindowSwitcher",
     "type": "Module"
-  },
-  {
-    "desc": "Canvas-based paste library with paging and delete mode:",
-    "name": "PasteLibrary (v2.3.4)",
-    "type": "Module"
   }
 ]
