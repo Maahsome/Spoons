@@ -30,6 +30,12 @@ obj._logger = logger
 -- Internal helpers
 ------------------------------------------------------------
 local dockPlist = os.getenv("HOME") .. "/Library/Preferences/com.apple.dock.plist"
+local dockAppsCache = {}
+local dockAppsCacheMtime = nil
+
+local function logDuration(label, startTime)
+    logger.df("%s: %.3fs", label, hs.timer.secondsSinceEpoch() - startTime)
+end
 
 local function decodeURL(str)
     return (str:gsub("%%(%x%x)", function(hex)
@@ -41,6 +47,12 @@ end
 -- Dock apps
 ------------------------------------------------------------
 local function getDockApps()
+    local attrs = hs.fs.attributes(dockPlist)
+    local mtime = attrs and attrs.modification
+    if mtime and dockAppsCacheMtime == mtime then
+        return dockAppsCache
+    end
+
     local choices = {}
     local plist = hs.plist.read(dockPlist)
     if not plist then return choices end
@@ -70,6 +82,8 @@ local function getDockApps()
             end
         end
     end
+    dockAppsCache = choices
+    dockAppsCacheMtime = mtime
     return choices
 end
 
@@ -98,6 +112,7 @@ local visibleWindowFilter = hs.window.filter.new()
     :setOverrideFilter({ visible = true })
 
 local runningAppsCache = {}
+local runningAppsRefreshTimer = nil
 
 local function refreshRunningApps()
     local windows = visibleWindowFilter:getWindows()
@@ -133,6 +148,16 @@ local function refreshRunningApps()
     runningAppsCache = apps
 end
 
+local function scheduleRunningAppsRefresh()
+    if runningAppsRefreshTimer then
+        runningAppsRefreshTimer:stop()
+    end
+    runningAppsRefreshTimer = hs.timer.doAfter(0.5, function()
+        runningAppsRefreshTimer = nil
+        refreshRunningApps()
+    end)
+end
+
 refreshRunningApps()
 visibleWindowFilter:subscribe({
     hs.window.filter.windowCreated,
@@ -141,7 +166,7 @@ visibleWindowFilter:subscribe({
     hs.window.filter.windowHidden,
     hs.window.filter.windowMinimized,
     hs.window.filter.windowUnminimized,
-}, function() hs.timer.doAfter(0.5, refreshRunningApps) end)
+}, scheduleRunningAppsRefresh)
 
 ------------------------------------------------------------
 -- Public API
@@ -159,6 +184,24 @@ local keyRows = {"A","B","C","D","E","F","G","H","I","J"}
 local keyCols = keyRows
 
 function obj:showGrid()
+    if self._showInProgress then
+        self._logger.df("showGrid ignored while a grid is already being prepared")
+        return
+    end
+
+    if self._activeCanvas then
+        self._logger.df("showGrid ignored because a grid is already visible")
+        return
+    end
+
+    self._showInProgress = true
+    local startTime = hs.timer.secondsSinceEpoch()
+
+    local function finishShow()
+        self._showInProgress = false
+        logDuration("showGrid total", startTime)
+    end
+
     --------------------------------------------------------
     -- Determine target screen
     --------------------------------------------------------
@@ -172,6 +215,7 @@ function obj:showGrid()
         end
     end
     if not screen then screen = hs.screen.mainScreen() end
+    logDuration("showGrid screen lookup", startTime)
 
     local frame  = screen:frame()
     local cw, ch = frame.w * 0.66, frame.h * 0.8
@@ -194,9 +238,16 @@ function obj:showGrid()
             seen[app.bundleID] = true
         end
     end
+    logDuration("showGrid app collection", startTime)
 
     local total = math.min(#apps, gridRows * gridCols)
     local cellW, cellH = cw / gridCols, ch / gridRows
+    local runningBundleIDs = {}
+    for _, app in ipairs(runningApps) do
+        if app.bundleID then
+            runningBundleIDs[app.bundleID] = true
+        end
+    end
 
     --------------------------------------------------------
     -- Canvas setup
@@ -205,6 +256,8 @@ function obj:showGrid()
     canvas:level(hs.canvas.windowLevels.mainMenu + 1)
     canvas:alpha(0.95)
     canvas:show()
+    self._activeCanvas = canvas
+    logDuration("showGrid canvas visible", startTime)
 
     canvas[#canvas + 1] = {
         type = "rectangle",
@@ -222,7 +275,7 @@ function obj:showGrid()
         local c = ((i - 1) % gridCols) + 1
         local x, y = (c - 1) * cellW, (r - 1) * cellH
 
-        if hs.application.get(app.bundleID) then
+        if app.bundleID and runningBundleIDs[app.bundleID] then
             canvas[#canvas + 1] = {
                 type = "rectangle",
                 action = "fill",
@@ -269,6 +322,7 @@ function obj:showGrid()
             textAlignment = "right",
         }
     end
+    logDuration("showGrid grid drawn", startTime)
 
     --------------------------------------------------------
     -- Fade animation helper
@@ -306,7 +360,9 @@ function obj:showGrid()
 
     local function closeCanvas()
         if watcher then watcher:stop() end
+        self._activeWatcher = nil
         canvas:delete()
+        self._activeCanvas = nil
     end
 
     local function fadeUnselectedColumns(colIdx)
@@ -367,7 +423,9 @@ function obj:showGrid()
         end
         return false
     end)
+    self._activeWatcher = watcher
     watcher:start()
+    finishShow()
 end
 
 ------------------------------------------------------------
